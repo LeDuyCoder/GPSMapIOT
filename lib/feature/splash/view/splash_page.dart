@@ -45,9 +45,8 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
       buildWhen: (previous, current) => current is SplashInitial,
       listener: (context, state) {
         if(state is SplashSendToScreen){
-          //Navigator.pushReplacementNamed(context, "/usb");
+          Navigator.pushReplacementNamed(context, "/usb");
         }
-
       },
       builder: (context, state) {
         return Scaffold(

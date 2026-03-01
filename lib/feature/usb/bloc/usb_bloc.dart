@@ -20,25 +20,32 @@ class UsbBloc extends Bloc<UsbEvent, UsbState> {
       UsbConnect event,
       Emitter<UsbState> emit,
       ) async {
-    emit(UsbConnecting());
 
     final result = await usbService.connect();
+    //
+    // if (result != UsbStateEnum.connected) {
+    //   emit(UsbFailure('USB not connected'));
+    //   return;
+    // }
 
-    if (result != UsbStateEnum.connected) {
+    if(result == UsbStateEnum.connected){
+      emit(UsbConnected());
+      Future.delayed(Duration(seconds: 1));
+      emit.forEach<String>(
+        usbService.stream,
+        onData: (data) {
+          // if (data == '__USB_DETACHED__') {
+          //   return UsbFailure("disconnected");
+          // }
+          // if (data == '__USB_ATTACHED__') {
+          // }
+          return UsbDataLoaded();
+        },
+      );
+    } else {
       emit(UsbFailure('USB not connected'));
       return;
     }
-
-    // 🔥 Lắng nghe stream từ USB
-    await emit.forEach<String>(
-      usbService.stream,
-      onData: (data) {
-        return UsbDataTest(data);
-      },
-      onError: (error, stackTrace) {
-        return UsbFailure(error.toString());
-      },
-    );
   }
 
   void _onRawData(
