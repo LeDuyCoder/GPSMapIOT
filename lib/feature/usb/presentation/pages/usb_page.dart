@@ -1,40 +1,53 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:gpsmapiot/core/services/usb_service.dart' hide UsbState;
-import 'package:gpsmapiot/feature/map/presentation/pages/map_page.dart';
 import 'package:gpsmapiot/feature/usb/bloc/usb_bloc.dart';
 import 'package:gpsmapiot/feature/usb/bloc/usb_event.dart';
 import 'package:gpsmapiot/feature/usb/bloc/usb_state.dart';
+import 'package:gpsmapiot/feature/usb/presentation/widget/failure_connect_usb_widget.dart';
+import 'package:gpsmapiot/feature/usb/presentation/widget/success_connect_usb_widget.dart';
+import 'package:gpsmapiot/feature/usb/presentation/widget/waiting_connect_usb_widget.dart';
 
 class UsbPage extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (_) => UsbBloc(UsbService())..add(UsbConnect()),
+        create: (_) => UsbBloc(UsbService()),
         child: BlocBuilder<UsbBloc, UsbState>(
           builder: (context, state) {
+            if(state is UsbInitial){
+              return Scaffold(
+                body: WaitingConnectUsbWidget(
+                  onTap: () {
+                    context.read<UsbBloc>().add(UsbConnect());
+                  },
+                )
+              );
+            }
+
             if (state is UsbConnecting) {
               return const CircularProgressIndicator();
             }
 
-            if(state is UsbDataTest){
+            if (state is UsbFailure) {
               return Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: MediaQuery.sizeOf(context).height,
-                child: Center(
-                  child: Text(state.raw),
+                child: FailureConnectUsbWidget(
+                  onTap: (){
+                    context.read<UsbBloc>().add(UsbConnect());
+                  },
                 ),
               );
             }
 
-            // if (state is UsbDataLoaded) {
-            //   return MapPage(coordinates: state.coordinates);
-            // }
+            if(state is UsbConnected){
+              return SuccessConnectUsbWidget(onTap: (){});
+            }
 
-            if (state is UsbFailure) {
-              return MapPage(coordinates: []);
+            if(state is UsbDataLoaded){
+              return Container();
             }
 
             return SizedBox(

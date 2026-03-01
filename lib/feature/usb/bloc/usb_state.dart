@@ -8,17 +8,7 @@ class UsbConnecting extends UsbState {}
 
 class UsbConnected extends UsbState {}
 
-class UsbDataLoaded extends UsbState {
-  final List<CoordinateModel> coordinates;
-
-  UsbDataLoaded({required this.coordinates});
-}
-
-class UsbDataTest extends UsbState {
-  final String raw;
-
-  UsbDataTest(this.raw);
-}
+class UsbDataLoaded extends UsbState {}
 
 class UsbFailure extends UsbState {
   final String message;
